@@ -20,27 +20,19 @@ public class PokemonController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PokemonViewModel>>> GetPokemons()
     {
-        if (_context.Pokemons == null)
-        {
-            return NotFound();
-        }
+        if (DatabaseIsNull()) { return DatabaseNullError(); }
         return await _context.Pokemons.Select(p => PokemonViewModel.FromModel(p)).ToListAsync();
     }
 
     // GET: api/Pokemon/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PokemonViewModel>> GetPokemon(int id)
+    [HttpGet("{number}")]
+    public async Task<ActionResult<PokemonViewModel>> GetPokemon(string number)
     {
-        if (_context.Pokemons == null)
-        {
-            return NotFound();
-        }
-        Model.Pokemon? pokemon = await _context.Pokemons.FindAsync(id);
+        if (DatabaseIsNull()) { return DatabaseNullError(); }
 
-        if (pokemon == null)
-        {
-            return NotFound();
-        }
+        Model.Pokemon? pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.Number == number);
+
+        if (pokemon == null) { return NotFound(); }
 
         return PokemonViewModel.FromModel(pokemon);
     }
@@ -50,10 +42,7 @@ public class PokemonController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPokemon(int id, PokemonViewModel pokemon)
     {
-        if (id != pokemon.Id)
-        {
-            return BadRequest();
-        }
+        if (id != pokemon.Id) { return BadRequest(); }
 
         _context.Entry(pokemon).State = EntityState.Modified;
 
@@ -81,10 +70,8 @@ public class PokemonController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PokemonViewModel>> PostPokemon(PokemonViewModel pokemon)
     {
-        if (_context.Pokemons == null)
-        {
-            return Problem("Entity set 'Context.Pokemons'  is null.");
-        }
+        if (DatabaseIsNull()) { return DatabaseNullError(); }
+
         _context.Pokemons.Add(pokemon.ToModel());
         await _context.SaveChangesAsync();
 
@@ -95,10 +82,8 @@ public class PokemonController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePokemon(int id)
     {
-        if (_context.Pokemons == null)
-        {
-            return NotFound();
-        }
+        if (DatabaseIsNull()) { return DatabaseNullError(); }
+
         Model.Pokemon? pokemon = await _context.Pokemons.FindAsync(id);
         if (pokemon == null)
         {
@@ -111,6 +96,8 @@ public class PokemonController : ControllerBase
         return NoContent();
     }
 
+    private ObjectResult DatabaseNullError() => Problem("Entity set 'Context.Pokemons'  is null.");
+    private bool DatabaseIsNull() => _context.Pokemons == null;
     private bool PokemonExists(int id)
     {
         return (_context.Pokemons?.Any(e => e.Id == id)).GetValueOrDefault();
