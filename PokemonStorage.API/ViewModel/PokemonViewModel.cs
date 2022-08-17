@@ -20,6 +20,7 @@ public class PokemonViewModel : ModelBase
     {
         return new PokemonViewModel()
         {
+            Id = model.Id,
             Number = model.Number,
             Name = model.Name,
             TypesIds = model.Types.Select(t => t.Id).ToArray(),
@@ -31,6 +32,7 @@ public class PokemonViewModel : ModelBase
     {
         Pokemon model = new Pokemon()
         {
+            Id = Id,
             Number = Number,
             Name = Name
         };

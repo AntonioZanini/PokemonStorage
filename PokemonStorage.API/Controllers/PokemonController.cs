@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PokemonStorage.API.Data;
+using PokemonStorage.API.Model;
 using PokemonStorage.API.ViewModel;
 
 namespace PokemonStorage.API.Controllers;
@@ -30,7 +31,8 @@ public class PokemonController : ControllerBase
     {
         if (DatabaseIsNull()) { return DatabaseNullError(); }
 
-        Model.Pokemon? pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.Number == number);
+        //Model.Pokemon? pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.Number == number);
+        Pokemon? pokemon = _context.Read(new EntityQuery<Pokemon>().Filter(p => p.Number == number)).FirstOrDefault();
 
         if (pokemon == null) { return NotFound(); }
 
