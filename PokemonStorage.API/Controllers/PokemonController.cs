@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PokemonStorage.API.Data;
+using PokemonStorage.API.Extensions;
 using PokemonStorage.API.Model;
 using PokemonStorage.API.ViewModel;
 
@@ -19,10 +20,12 @@ public class PokemonController : ControllerBase
 
     // GET: api/Pokemon
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PokemonViewModel>>> GetPokemons()
+    public ActionResult<IEnumerable<PokemonViewModel>> GetPokemons()
     {
         if (DatabaseIsNull()) { return DatabaseNullError(); }
-        return await _context.Pokemons.Select(p => PokemonViewModel.FromModel(p)).ToListAsync();
+        //return await _context.Pokemons.Select(p => PokemonViewModel.FromModel(p)).ToListAsync();
+        return Ok(_context.Read(new EntityQuery<Pokemon>())
+            .Select(p => PokemonViewModel.FromModel(_context.LoadCollection(p, p => p.Abilities)))); //.Pokemons.Select(p => PokemonViewModel.FromModel(p)).ToListAsync();
     }
 
     // GET: api/Pokemon/5
@@ -31,10 +34,11 @@ public class PokemonController : ControllerBase
     {
         if (DatabaseIsNull()) { return DatabaseNullError(); }
 
-        //Model.Pokemon? pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.Number == number);
-        Pokemon? pokemon = _context.Read(new EntityQuery<Pokemon>().Filter(p => p.Number == number)).FirstOrDefault();
+        Model.Pokemon? pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.Number == number);
 
         if (pokemon == null) { return NotFound(); }
+
+        _context.LoadCollection(pokemon, p => p.Abilities);
 
         return PokemonViewModel.FromModel(pokemon);
     }

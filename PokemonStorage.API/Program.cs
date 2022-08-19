@@ -14,7 +14,15 @@ builder.Services.AddDbContext<Context>(opt =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IDBInitializer, DBInitializer>();
+
 var app = builder.Build();
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    IDBInitializer s = scope.ServiceProvider.GetRequiredService<IDBInitializer>();
+    s.Seed();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

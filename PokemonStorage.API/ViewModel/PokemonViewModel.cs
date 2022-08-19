@@ -7,6 +7,7 @@ public class PokemonViewModel : ModelBase
     public string Name { get; set; }
     public int[] TypesIds { get; set; }
     public string[] TypesNames { get; private set; }
+    public string[] AbilitiesNames { get; private set; }
 
     public PokemonViewModel()
     {
@@ -24,7 +25,8 @@ public class PokemonViewModel : ModelBase
             Number = model.Number,
             Name = model.Name,
             TypesIds = model.Types.Select(t => t.Id).ToArray(),
-            TypesNames = model.Types.Select(t => t.Name).ToArray()
+            TypesNames = model.Types.Select(t => t.Name).ToArray(),
+            AbilitiesNames = model.Abilities.Select(t => t.Name).ToArray(),
         };
     }
 
